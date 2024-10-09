@@ -1,0 +1,5 @@
+ENTRY "Home" URL "/home/artem"
+ENTRY "Google Drive" URL "/mnt/g/My Drive"
+ENTRY "Rust private repos" URL "/home/artem/rust/private_repos"
+ENTRY "Rust github repos" URL "/home/artem/rust/github.com"
+ENTRY "o2o" URL "/home/artem/rust/github.com/o2o"
