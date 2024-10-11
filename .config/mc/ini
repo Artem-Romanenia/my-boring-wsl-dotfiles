@@ -92,7 +92,7 @@ top_panel_size=0
 message_visible=true
 keybar_visible=true
 xterm_title=true
-command_prompt=true
+command_prompt=false
 menubar_visible=true
 free_space=true
 horizontal_split=false
@@ -127,14 +127,14 @@ fast_reload_msg_shown=false
 mark_moves_down=true
 reverse_files_only=true
 auto_save_setup_panels=false
-navigate_with_arrows=false
+navigate_with_arrows=true
 panel_scroll_pages=true
 panel_scroll_center=false
 mouse_move_pages=true
 filetype_mode=true
 permission_mode=false
 torben_fj_mode=false
-quick_search_mode=2
+quick_search_mode=0
 select_flags=6
 
 simple_swap=false
@@ -155,7 +155,7 @@ ignore_dirs_enable=true
 ignore_dirs=
 
 [Panelize]
-Find *.orig after patching=find . -name \\*.orig -print
 Find SUID and SGID programs=find . \\( \\( -perm -04000 -a -perm /011 \\) -o \\( -perm -02000 -a -perm /01 \\) \\) -print
-Find rejects after patching=find . -name \\*.rej -print
 Modified git files=git ls-files --modified
+Find rejects after patching=find . -name \\*.rej -print
+Find *.orig after patching=find . -name \\*.orig -print

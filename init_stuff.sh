@@ -17,62 +17,58 @@ fi
 
 
 
-echo "========== Modifying wsl.conf"
+read -p "Do you want to update /etc/wsl.conf to include generateResolvConf=false setting? (y/n): " mod_wsl_conf
 
-if grep -q "\[network\]" /etc/wsl.conf
+if [ $mod_wsl_conf = y ]
 then
-	if grep -q "generateResolvConf" /etc/wsl.conf
+	echo "========== Modifying wsl.conf"
+
+	if grep -q "\[network\]" /etc/wsl.conf
 	then
-		echo "wsl.conf seems to be properly configured"
-	else
-		read -p "Modify wsl.conf and add generateResolvConf = false to the [network] section. Ready? (y/n): " wsl_ready
-		if [ $wsl_ready = y ]
+		if grep -q "generateResolvConf" /etc/wsl.conf
 		then
-			sudo vim /etc/wsl.conf
+			echo "wsl.conf seems to be properly configured"
 		else
-			echo "Skipping wsl.conf configuration"
+			read -p "Modify wsl.conf and add generateResolvConf = false to the [network] section. Ready? (y/n): " wsl_ready
+			if [ $wsl_ready = y ]
+			then
+				sudo vim /etc/wsl.conf
+			else
+				echo "Skipping wsl.conf configuration"
+			fi
 		fi
+	else
+		echo "[network]" | sudo tee -a /etc/wsl.conf >> /dev/null
+		echo "generateResolvConf=false" | sudo tee -a /etc/wsl.conf >> /dev/null
+		echo "Modifying wsl.conf done"
 	fi
-else
-	echo "[network]" | sudo tee -a /etc/wsl.conf >> /dev/null
-	echo "generateResolvConf=false" | sudo tee -a /etc/wsl.conf >> /dev/null
-	echo "Modifying wsl.conf done"
 fi
 
 
 
-echo "========== Modifying resolv.conf"
+read -p "Do you want to modify /run/resolvconf/resolv.conf? (y/n): " mod_resolv_conf
 
-if [ -d /run/resolvconf ]
+if [ $mod_resolv_conf = y ]
 then
-	echo "===== Dir /run/resolvconf already exists"
-else
-	echo "===== Creating /run/resolvconf dir"
-	sudo mkdir /run/resolvconf
+	echo "========== Modifying resolv.conf"
+
+	if [ -d /run/resolvconf ]
+	then
+		echo "===== Dir /run/resolvconf already exists"
+	else
+		echo "===== Creating /run/resolvconf dir"
+		sudo mkdir /run/resolvconf
+	fi
+
+	echo "===== Add nameserver 1.1.1.1"
+	echo "nameserver 1.1.1.1" | sudo tee /run/resolvconf/resolv.conf > /dev/null
+	echo "Modifying resolv.conf done"
 fi
 
-echo "===== Add nameserver 1.1.1.1"
-echo "nameserver 1.1.1.1" | sudo tee /run/resolvconf/resolv.conf > /dev/null
-echo "Modifying resolv.conf done"
 
 
-
-echo "========== Installing build essentials"
-sudo apt-get install build-essential
-
-
-
-echo "========== Installing Rust"
-
-if [ -d .rustup ]
-then
-	echo "Rust is already installed"
-else
-	echo "===== Dowloading"
-	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-	echo "===== Update env"
-	. "$HOME/.cargo/env"
-fi
+echo "========== Installing Midnight Commander"
+sudo apt install mc
 
 
 
@@ -93,10 +89,40 @@ else
 	echo "Installing YADM done"
 fi
 
- 
 
-echo "========== Installing Midnight Commander"
-sudo apt install mc
+
+echo "========== Installing Python stuff"
+sudo apt install python3-pip
+sudo apt install python3-virtualenv
+
+if ! [ -d /home/artem/.mainvenv ]
+then
+	virtualenv -p python3 /home/artem/.mainvenv
+fi
+
+
+
+echo "========== Installing Npm"
+sudo apt install npm
+
+
+
+echo "========== Installing build essentials"
+sudo apt-get install build-essential
+
+
+
+echo "========== Installing Rust"
+
+if [ -d .rustup ]
+then
+	echo "Rust is already installed"
+else
+	echo "===== Dowloading"
+	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+	echo "===== Update env"
+	. "$HOME/.cargo/env"
+fi
 
 
 
