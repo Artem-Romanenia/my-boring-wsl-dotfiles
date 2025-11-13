@@ -1,0 +1,53 @@
+set number relativenumber
+map gi :vsc Edit.GoToImplementation<CR>
+map gk :vsc Edit.PreviousMethod<CR>
+map gj :vsc Edit.NextMethod<CR>
+map gr :vsc Edit.FindAllReferences<CR>
+map gh :vsc Edit.QuickInfo<CR>
+
+:ab PrD ProblemDetails
+:ab nprd new ProblemDetails() {<CR>
+:ab tnse throw new NotSupportedException()
+
+:vnoremap <space> <Esc>
+
+" Mild support for sub-word navigation (wordsLikeThis)
+:noremap <C-w> /[^a-z]<CR>
+:noremap vi<C-w> /[^a-z]<CR>hv?[A-Z]<CR>o
+:noremap di<C-w> /[^a-z]<CR>hv?[A-Z]<CR>d
+:noremap ci<C-w> /[^a-z]<CR>hv?[A-Z]<CR>c
+
+" Select < - selects current word<...>
+:nnoremap s< f<va<ob
+" Select ( - selects current word(...)
+:nnoremap s( f(va(ob
+" Select Method
+:nmap sm gkv/{<CR>%
+
+" Make Implementation After
+:nmap mia ^f(va(o^ygkf(bgi
+" Make Implementation Insert After
+:nnoremap miia /{<CR>%o<Esc>opublic<space><Esc>pf(%
+
+" Make Implementation Before
+:nmap mib ^f(va(o^ygjf(bgi
+" Make Implementation Insert Before
+:nnoremap miib O<Esc>Opublic<space><Esc>pf(%
+
+" Make Await
+:nnoremap ma i"[+placeholder+]"<Esc>?\M;\|{\|}<CR>/\M\[\S\]<CR>:s/\M^\(\[ \]\*\)\(\(var\|\[A-Za-z0-9\]\+\(<\.\*\?>\)\*\?\) \[A-Za-z0-9@\]\+ = \)\?\(\.\)/\1\2await \5/g<CR>/\[+placeholder+\]<CR>da"
+" Make Method Async
+:nmap mma i"[+placeholder+]"<Esc>gk:s/\M\((\.\+\?)\|\[A-Za-z0-9\]\+\(<\.\*\?>\)\*\?\) \(\[A-Za-z0-9\]\+\(<\.\*\?>\)\*\?\)(/async \1 \3(/g<CR>/\[+placeholder+\]<CR>da"
+" Make Method Task
+:nmap mmt i"[+placeholder+]"<Esc>gk:s/\Mvoid \(\[A-Za-z0-9\]\+\(<\.\*\?>\)\*\?\)(/Task \1(/g<CR>:s/\M \(\?\!Task\)\((\.\+\?)\|\[A-Za-z0-9\]\+\(<\.\*\?>\|?\)\*\?\) \(\[A-Za-z0-9\]\+\(<\.\*\?>\)\*\?\)(/ Task<\1> \3(/g<CR>/\[+placeholder+\]<CR>da"
+
+" Make Try
+:vnoremap mtry ctry{<CR><Esc>Vpk%ocatch(Exception ex){<CR>
+
+" Make Enum Mapper
+:nmap mem me?^$<CR>msj"fciw<Del><Esc>"tciw<Del><Esc>V'e"odapublic static class <Esc>"fpaMapper {<CR>public static <Esc>"fpa MapToDomain(this <Esc>"tpa src) => src switch {<Esc>a<CR><Esc>V"op/}<CR>O_ => throw new NotSupportedException()<Esc>/}<CR>a;<Esc>opublic static <Esc>"tpa MapToEntity(this <Esc>"fpa src) => src switch {<Esc>a<CR><Esc>V"op/}<CR>a;<Esc>O_ => throw new NotSupportedException()<Esc>?;<CR>o<Esc>?MapToDomain<CR>
+:nmap mek /opt:<CR>ciw<Del><Esc>^diw"tpa.<Esc>pa => <Esc>"fpa.<Esc>pa,<Esc>
+:nmap mel /opt:<CR>ciw<Del><Esc>^diw"fpa.<Esc>pa => <Esc>"tpa.<Esc>pa,<Esc>
+
+" Make Lambda Braced
+:noremap mlb vi(owwdi{<CR>return <Esc>pa;<Esc>
