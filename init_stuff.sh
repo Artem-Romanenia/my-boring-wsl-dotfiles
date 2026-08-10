@@ -1,4 +1,4 @@
-#!/bin/bash
+!/bin/bash
 
 
 read -p "Do you want to update apt? (y/n): " apt_update
@@ -70,7 +70,8 @@ fi
 echo "========== Installing Midnight Commander"
 sudo apt install mc
 
-
+echo "========== Installing Neovim"
+sudo snap install nvim --classic
 
 echo "========== Installing YADM"
 sudo apt install yadm
@@ -91,25 +92,33 @@ fi
 
 
 
-echo "========== Installing Python stuff"
-sudo apt install python3-pip
-sudo apt install python3-virtualenv
+read -p "Do you want to install Python stuff? (y/n): " install_python
 
-if ! [ -d /home/artem/.mainvenv ]
+if [ $install_python = y ]
 then
-	virtualenv -p python3 /home/artem/.mainvenv
+	echo "========== Installing Python stuff"
+	sudo apt install python3-pip
+	sudo apt install python3-virtualenv
+
+	if ! [ -d /home/artem/.mainvenv ]
+	then
+		virtualenv -p python3 /home/artem/.mainvenv
+	fi
 fi
 
 
 
-echo "========== Installing Npm"
-sudo apt install npm
+read -p "Do you want to install Npm? (y/n): " install_npm
 
+if [ $install_npm = y ]
+then
+	echo "========== Installing Npm"
+	sudo apt install npm
+fi
 
 
 echo "========== Installing build essentials"
 sudo apt-get install build-essential
-
 
 
 echo "========== Installing Rust"
@@ -124,32 +133,22 @@ else
 	. "$HOME/.cargo/env"
 fi
 
+echo "========== Installing Docker"
 
-
-echo "========== Installing Neovim"
-
-if [ -f /usr/bin/nvim ]
-then
-	echo "Neovim is already installed"
+if command -v docker &> /dev/null; then
+	echo "Docker is already installed"
 else
-	echo "===== Getting the AppImage file"
-	curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
-	echo "===== Making executable"
-	sudo chmod u+x nvim.appimage
-	echo "===== Extract AppImage"
-	./nvim.appimage --appimage-extract
-	echo "===== Move extracted files to root"
-	sudo mv squashfs-root /
-	echo "===== Create symlink in /usr/bin"
-	sudo ln -s /squashfs-root/AppRun /usr/bin/nvim
-	echo "===== Clone packer.nvim"
-	git clone --depth 1 https://github.com/wbthomason/packer.nvim ~/.local/share/nvim/site/pack/packer/start/packer.nvim
-	read -p "Now Neovim will run. Run ':PackerSync'. Ready? (y/n): " nvim_ready
-	if [ $nvim_ready = y ]
-	then
-		nvim
-	else
-		echo "Skipping Neovim configuration"
-	fi
-	echo "Installing Neovim done"
+	wget -O docker_install.sh https://get.docker.com/
+	chmod +x docker_install.sh
+	echo "===== Changing to legacy sudo"
+	echo "SELECT SUDO.WS OPTION WHEN ASKED"
+	sudo update-alternatives --config sudo
+	./docker_install.sh
+	echo "===== Switch to rootless mode"
+	sudo apt-get install -y uidmap
+	/usr/bin/dockerd-rootless-setuptool.sh install
+	rm docker_install.sh
+	echo "===== Changing back to new sudo mode"
+	echo "SELECT SUDO OPTION WHEN ASKED"
+	sudo update-alternatives --config sudo
 fi

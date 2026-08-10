@@ -44,10 +44,5 @@ map gh :vsc Edit.QuickInfo<CR>
 " Make Try
 :vnoremap mtry ctry{<CR><Esc>Vpk%ocatch(Exception ex){<CR>
 
-" Make Enum Mapper
-:nmap mem me?^$<CR>msj"fciw<Del><Esc>"tciw<Del><Esc>V'e"odapublic static class <Esc>"fpaMapper {<CR>public static <Esc>"fpa MapToDomain(this <Esc>"tpa src) => src switch {<Esc>a<CR><Esc>V"op/}<CR>O_ => throw new NotSupportedException()<Esc>/}<CR>a;<Esc>opublic static <Esc>"tpa MapToEntity(this <Esc>"fpa src) => src switch {<Esc>a<CR><Esc>V"op/}<CR>a;<Esc>O_ => throw new NotSupportedException()<Esc>?;<CR>o<Esc>?MapToDomain<CR>
-:nmap mek /opt:<CR>ciw<Del><Esc>^diw"tpa.<Esc>pa => <Esc>"fpa.<Esc>pa,<Esc>
-:nmap mel /opt:<CR>ciw<Del><Esc>^diw"fpa.<Esc>pa => <Esc>"tpa.<Esc>pa,<Esc>
-
 " Make Lambda Braced
 :noremap mlb vi(owwdi{<CR>return <Esc>pa;<Esc>
