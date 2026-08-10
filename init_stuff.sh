@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 
 
 read -p "Do you want to update apt? (y/n): " apt_update
@@ -141,7 +141,7 @@ else
 	wget -O docker_install.sh https://get.docker.com/
 	chmod +x docker_install.sh
 	echo "===== Changing to legacy sudo"
-	echo "SELECT SUDO.WS OPTION WHEN ASKED"
+	echo "SELECT SUDO.WS WHEN ASKED"
 	sudo update-alternatives --config sudo
 	./docker_install.sh
 	echo "===== Switch to rootless mode"
@@ -149,6 +149,6 @@ else
 	/usr/bin/dockerd-rootless-setuptool.sh install
 	rm docker_install.sh
 	echo "===== Changing back to new sudo mode"
-	echo "SELECT SUDO OPTION WHEN ASKED"
+	echo "SELECT AUTO MODE WHEN ASKED"
 	sudo update-alternatives --config sudo
 fi
