@@ -1,72 +1,12 @@
 #!/bin/bash
 
-
-read -p "Do you want to update apt? (y/n): " apt_update
-
-if [ $apt_update = y ]
-then
-	sudo apt update
-fi
-
-read -p "Do you want to upgrade apt? (y/n): " apt_upgrade
-
-if [ $apt_upgrade = y ]
-then
-	sudo apt upgrade
-fi
+cat << 'EOF' > init_stuff_apt_update.sh
+sudo apt update
+sudo apt upgrade
+EOF
 
 
-
-read -p "Do you want to update /etc/wsl.conf to include generateResolvConf=false setting? (y/n): " mod_wsl_conf
-
-if [ $mod_wsl_conf = y ]
-then
-	echo "========== Modifying wsl.conf"
-
-	if grep -q "\[network\]" /etc/wsl.conf
-	then
-		if grep -q "generateResolvConf" /etc/wsl.conf
-		then
-			echo "wsl.conf seems to be properly configured"
-		else
-			read -p "Modify wsl.conf and add generateResolvConf = false to the [network] section. Ready? (y/n): " wsl_ready
-			if [ $wsl_ready = y ]
-			then
-				sudo vim /etc/wsl.conf
-			else
-				echo "Skipping wsl.conf configuration"
-			fi
-		fi
-	else
-		echo "[network]" | sudo tee -a /etc/wsl.conf >> /dev/null
-		echo "generateResolvConf=false" | sudo tee -a /etc/wsl.conf >> /dev/null
-		echo "Modifying wsl.conf done"
-	fi
-fi
-
-
-
-read -p "Do you want to modify /run/resolvconf/resolv.conf? (y/n): " mod_resolv_conf
-
-if [ $mod_resolv_conf = y ]
-then
-	echo "========== Modifying resolv.conf"
-
-	if [ -d /run/resolvconf ]
-	then
-		echo "===== Dir /run/resolvconf already exists"
-	else
-		echo "===== Creating /run/resolvconf dir"
-		sudo mkdir /run/resolvconf
-	fi
-
-	echo "===== Add nameserver 1.1.1.1"
-	echo "nameserver 1.1.1.1" | sudo tee /run/resolvconf/resolv.conf > /dev/null
-	echo "Modifying resolv.conf done"
-fi
-
-
-
+cat << 'EOF' > init_stuff_install_basics.sh
 echo "========== Installing Midnight Commander"
 sudo apt install mc
 
@@ -75,9 +15,10 @@ sudo snap install nvim --classic
 
 echo "========== Installing YADM"
 sudo apt install yadm
+EOF
 
 
-
+cat << 'EOF' > init_stuff_clone_dotfiles.sh
 echo "========== Cloning YADM repo"
 if [ -d .local/share/yadm/repo.git ]
 then
@@ -87,36 +28,30 @@ else
 	yadm clone "https://github.com/Artem-Romanenia/my-boring-wsl-dotfiles"
 	echo "===== Overriding original files"
 	yadm restore .
-	echo "Installing YADM done"
+	echo "===== Installing YADM done"
 fi
+EOF
 
 
+cat << 'EOF' > init_stuff_install_python.sh
+echo "========== Installing Python stuff"
+sudo apt install python3-pip
+sudo apt install python3-virtualenv
 
-read -p "Do you want to install Python stuff? (y/n): " install_python
-
-if [ $install_python = y ]
+if ! [ -d /home/artem/.mainvenv ]
 then
-	echo "========== Installing Python stuff"
-	sudo apt install python3-pip
-	sudo apt install python3-virtualenv
-
-	if ! [ -d /home/artem/.mainvenv ]
-	then
-		virtualenv -p python3 /home/artem/.mainvenv
-	fi
+	virtualenv -p python3 /home/artem/.mainvenv
 fi
+EOF
 
 
-
-read -p "Do you want to install Npm? (y/n): " install_npm
-
-if [ $install_npm = y ]
-then
-	echo "========== Installing Npm"
-	sudo apt install npm
-fi
+cat << 'EOF' > init_stuff_install_npm.sh
+echo "========== Installing Npm"
+sudo apt install npm
+EOF
 
 
+cat << 'EOF' > init_stuff_install_rust.sh
 echo "========== Installing build essentials"
 sudo apt-get install build-essential
 
@@ -132,9 +67,11 @@ else
 	echo "===== Update env"
 	. "$HOME/.cargo/env"
 fi
+EOF
 
+
+cat << 'EOF' > init_stuff_install_docker.sh
 echo "========== Installing Docker"
-
 if command -v docker &> /dev/null; then
 	echo "Docker is already installed"
 else
@@ -152,3 +89,69 @@ else
 	echo "SELECT AUTO MODE WHEN ASKED"
 	sudo update-alternatives --config sudo
 fi
+EOF
+
+
+chmod +x init_stuff_apt_update.sh
+chmod +x init_stuff_install_basics.sh
+chmod +x init_stuff_clone_dotfiles.sh
+chmod +x init_stuff_install_rust.sh
+chmod +x init_stuff_install_docker.sh
+chmod +x init_stuff_install_npm.sh
+chmod +x init_stuff_install_python.sh
+
+
+# Set Session Name
+SESSION="init_stuff"
+SESSIONEXISTS=$(tmux list-sessions | grep $SESSION)
+
+# Only create tmux session if it doesn't already exist
+if [ "$SESSIONEXISTS" = "" ]
+then
+	tmux new-session -d -s $SESSION
+
+	# Window 1
+
+	tmux rename-window -t 1 'First Time'
+	tmux send-keys -t 'First Time' 'sleep 0.2 && clear' Enter 'cat init_stuff_apt_update.sh' Enter './init_stuff_apt_update.sh'
+	tmux split-window -v
+	tmux send-keys -t 'First Time' 'sleep 0.2 && clear' Enter 'cat init_stuff_clone_dotfiles.sh' Enter './init_stuff_clone_dotfiles.sh'
+	tmux select-pane -t 1
+	tmux split-window -h
+	tmux send-keys -t 'First Time' 'sleep 0.2 && clear' Enter 'cat init_stuff_install_basics.sh' Enter './init_stuff_install_basics.sh'
+	tmux select-pane -t 1
+
+	# Window 2
+
+	tmux new-window -t $SESSION:2 -n 'Rust'
+	tmux send-keys -t 'Rust' 'sleep 0.2 && clear' Enter 'cat init_stuff_install_rust.sh' Enter './init_stuff_install_rust.sh'
+	tmux select-pane -t 1
+
+	# Window 3
+
+	tmux new-window -t $SESSION:3 -n 'Docker'
+	tmux send-keys -t 'Docker' 'sleep 0.2 && clear' Enter 'cat init_stuff_install_docker.sh' Enter './init_stuff_install_docker.sh'
+	tmux select-pane -t 1
+
+	# Window 4
+
+	tmux new-window -t $SESSION:4 -n 'Npm'
+	tmux send-keys -t 'Npm' 'sleep 0.2 && clear' Enter 'cat init_stuff_install_npm.sh' Enter './init_stuff_install_npm.sh'
+	tmux select-pane -t 1
+
+	# Window 5
+
+	tmux new-window -t $SESSION:5 -n 'Python'
+	tmux send-keys -t 'Python' 'sleep 0.2 && clear' Enter 'cat init_stuff_install_python.sh' Enter './init_stuff_install_python.sh'
+	tmux select-pane -t 1
+fi
+
+tmux attach-session -t $SESSION:1
+
+rm init_stuff_apt_update.sh
+rm init_stuff_install_basics.sh
+rm init_stuff_clone_dotfiles.sh
+rm init_stuff_install_rust.sh
+rm init_stuff_install_docker.sh
+rm init_stuff_install_npm.sh
+rm init_stuff_install_python.sh
