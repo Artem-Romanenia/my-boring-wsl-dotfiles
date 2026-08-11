@@ -155,3 +155,8 @@ rm init_stuff_install_rust.sh
 rm init_stuff_install_docker.sh
 rm init_stuff_install_npm.sh
 rm init_stuff_install_python.sh
+
+
+if [ -z "$USERNAME" ]; then
+	echo "You may want to set Windows environment variable WSLENV with value 'USERNAME/l'"
+fi
