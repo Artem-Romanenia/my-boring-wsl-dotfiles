@@ -99,8 +99,8 @@ if command -v dotnet &> /dev/null; then
 else
 	sudo apt install -y libicu-dev
 	wget -O dotnet_install.sh https://builds.dotnet.microsoft.com/dotnet/scripts/v1/dotnet-install.sh
-	chmod +x dotnet_install.sh --version 11
-	./dotnet_install.sh
+	chmod +x dotnet_install.sh
+	./dotnet_install.sh --version 11
 fi
 EOF
 
