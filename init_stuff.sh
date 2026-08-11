@@ -92,9 +92,23 @@ fi
 EOF
 
 
+cat << 'EOF' > init_stuff_install_dotnet.sh
+echo "========== Installing Dotnet"
+if command -v dotnet &> /dev/null; then
+	echo "Dotnet is already installed"
+else
+	sudo apt install -y libicu-dev
+	wget -O dotnet_install.sh https://builds.dotnet.microsoft.com/dotnet/scripts/v1/dotnet-install.sh
+	chmod +x dotnet_install.sh --version 11
+	./dotnet_install.sh
+fi
+EOF
+
+
 chmod +x init_stuff_apt_update.sh
 chmod +x init_stuff_install_basics.sh
 chmod +x init_stuff_clone_dotfiles.sh
+chmod +x init_stuff_install_dotnet.sh
 chmod +x init_stuff_install_rust.sh
 chmod +x init_stuff_install_docker.sh
 chmod +x init_stuff_install_npm.sh
@@ -123,25 +137,31 @@ then
 
 	# Window 2
 
-	tmux new-window -t $SESSION:2 -n 'Rust'
-	tmux send-keys -t 'Rust' 'sleep 0.2 && clear' Enter 'cat init_stuff_install_rust.sh' Enter './init_stuff_install_rust.sh'
+	tmux new-window -t $SESSION:2 -n 'Dotnet'
+	tmux send-keys -t 'Dotnet' 'sleep 0.2 && clear' Enter 'cat init_stuff_install_dotnet.sh' Enter './init_stuff_install_dotnet.sh'
 	tmux select-pane -t 1
 
 	# Window 3
 
-	tmux new-window -t $SESSION:3 -n 'Docker'
-	tmux send-keys -t 'Docker' 'sleep 0.2 && clear' Enter 'cat init_stuff_install_docker.sh' Enter './init_stuff_install_docker.sh'
+	tmux new-window -t $SESSION:3 -n 'Rust'
+	tmux send-keys -t 'Rust' 'sleep 0.2 && clear' Enter 'cat init_stuff_install_rust.sh' Enter './init_stuff_install_rust.sh'
 	tmux select-pane -t 1
 
 	# Window 4
 
-	tmux new-window -t $SESSION:4 -n 'Npm'
-	tmux send-keys -t 'Npm' 'sleep 0.2 && clear' Enter 'cat init_stuff_install_npm.sh' Enter './init_stuff_install_npm.sh'
+	tmux new-window -t $SESSION:4 -n 'Docker'
+	tmux send-keys -t 'Docker' 'sleep 0.2 && clear' Enter 'cat init_stuff_install_docker.sh' Enter './init_stuff_install_docker.sh'
 	tmux select-pane -t 1
 
 	# Window 5
 
-	tmux new-window -t $SESSION:5 -n 'Python'
+	tmux new-window -t $SESSION:5 -n 'Npm'
+	tmux send-keys -t 'Npm' 'sleep 0.2 && clear' Enter 'cat init_stuff_install_npm.sh' Enter './init_stuff_install_npm.sh'
+	tmux select-pane -t 1
+
+	# Window 6
+
+	tmux new-window -t $SESSION:6 -n 'Python'
 	tmux send-keys -t 'Python' 'sleep 0.2 && clear' Enter 'cat init_stuff_install_python.sh' Enter './init_stuff_install_python.sh'
 	tmux select-pane -t 1
 fi
@@ -151,6 +171,7 @@ tmux attach-session -t $SESSION:1
 rm init_stuff_apt_update.sh
 rm init_stuff_install_basics.sh
 rm init_stuff_clone_dotfiles.sh
+rm init_stuff_install_dotnet.sh
 rm init_stuff_install_rust.sh
 rm init_stuff_install_docker.sh
 rm init_stuff_install_npm.sh
